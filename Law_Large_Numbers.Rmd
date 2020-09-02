@@ -1,0 +1,220 @@
+---
+title: "LLN"
+author: "Pedro"
+date: "`r format(Sys.Date())`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library("moments")
+library("ggplot2")
+library("latex2exp")
+
+```
+
+## Law of Large Numbers (LLN) and Central Limit Theorem (CLT)
+
+LLN states that if $X_1, X_2, X_3, ..., X_n$ are a sequence of independent and identically distributed (iid) observations of size $n$ draw at random from a population with mean $mu$ and variance $\sigma^2$, as the number of random samples drawn increase, i.e., as $n\longrightarrow\infty$, the mean $\bar{X}=\displaystyle\sum^n_{i=1}\frac{X_i}{n}$ of the sampling distribution approaches $\mu$:
+
+\begin{eqnarray}
+\bar{X}&\sim&\mu\nonumber \\ 
+\end{eqnarray}\nonumber
+
+The LLN is a statement about the **center of the sampling distribution**. The CLT is a statement about the **shape of the sampling distribution**. As $n\longrightarrow\infty$, 
+
+
+\begin{eqnarray}
+\frac{\sqrt{n}(\bar{X}-\mu)}{\sigma}&\longrightarrow&\mathcal{N}\left(0,1\right).\nonumber \\ 
+\end{eqnarray}\nonumber
+
+In other words, as the number of random samples drawn increase the sampling distribution approaches a normal distribution, with mean mean given by the LLN and standard deviationn given by the CLT:
+
+\begin{eqnarray}
+\bar{X}&\longrightarrow&\mathcal{N}\left(\mu,\frac{\sigma}{\sqrt{n}}\right).\nonumber \\ 
+\end{eqnarray}\nonumber
+
+\autoref{fig:lln_clt1000} displays an example of the entire process. The population distribution (top left) is gamma distributed with $\alpha = \beta = 1$ and therefore far from Normal. The population mean and standard deviation are given by $\mu = \alpha\beta = 1$ and $\sigma = \sqrt{\alpha}\beta = 1$ respectively. The top right and center left plots of the figure show two random samples from this population, each of size $n = 1000$. The sample means $\bar x_i$ vary from sample to sample. The distribution of 1000 sample means is the **sampling distribution**. This sampling distribution appears on the center right plot. It is close to Normal (bottom left) with sampling standard deviation given by $\frac{\sigma}{\sqrt{n}}\simeq s = 0.14$, as expected due to the CLT since $n$ is very large.The sampling mean is close to the population mean $\mu \simeq \bar x = 0.99$, also as expected due to the LLN. It takes approximately 400 random drawn samples for the LLN and CLT to converge (center bottom left and center bottom right). 
+
+```{r lln_clt1000, echo=FALSE, fig.width=7, fig.height=8, fig.align='center', fig.cap='LLN and CLT (population parameters: $\\alpha = 1, \\beta = 1, \\mu = 1$; random sample: n = 50, $\\bar x_1 = 1.01, \\bar x_2 = 0.98$; sampling distribution: $\\bar x = 0.99, s = 0.03$)'}
+
+N <- 1000
+population_gamma <- rgamma(1000000,shape = 1,scale = 1)
+population_mean <- mean(population_gamma)
+population_sd <- sd(population_gamma)
+
+set.seed(1)
+random_sample1 <- sample(population_gamma,size = N,replace = FALSE)
+sample1_mean <- mean(random_sample1)
+
+set.seed(2)
+random_sample2 <- sample(population_gamma,size = N,replace = FALSE)
+sample2_mean <- mean(random_sample2)
+
+set.seed(3)
+sample_means <- sampling_mean_iteration <- sampling_sd_iteration <- rep(NA, 1000)
+for(i in 1:1000){
+  sample_means[i] = mean(sample(population_gamma,size = N,replace = FALSE))
+  sampling_mean_iteration[i] = mean(sample_means, na.rm = TRUE)
+  sampling_sd_iteration[i] = sd(sample_means, na.rm = TRUE)
+}
+
+sampling_mean <- mean(sample_means)
+sampling_sd <- sd(sample_means)
+theoretical_sampling_sd <- population_sd/sqrt(N)
+
+par(mfrow=c(4,2))
+hist(population_gamma, # histogram
+ col="lightgreen", # column color
+ border="black",
+ prob = TRUE, # show densities instead of frequencies
+ xlab = "",
+ main = "Population")
+lines(density(population_gamma), # density plot
+ lwd = 2, # thickness of line
+ col = "red")
+?bquote
+hist(random_sample1, # histogram
+ col="lightblue", # column color
+ border="black",
+ prob = TRUE, # show densities instead of frequencies
+ xlab = "",
+ main = "Random sample 1")
+lines(density(random_sample1), # density plot
+ lwd = 2, # thickness of line
+ col = "red")
+
+hist(random_sample2, # histogram
+ col="lightblue", # column color
+ border="black",
+ prob = TRUE, # show densities instead of frequencies
+ xlab = "",
+ main = "Random sample 2")
+lines(density(random_sample1), # density plot
+ lwd = 2, # thickness of line
+ col = "red")
+
+hist(sample_means, # histogram
+ col="purple", # column color
+ border="black",
+ prob = TRUE, # show densities instead of frequencies
+ xlab = "",
+ main = "Sampling distribution")
+lines(density(sample_means), # density plot
+ lwd = 2, # thickness of line
+ col = "red")
+
+plot(1:1000, sampling_mean_iteration,
+     col="blue",
+     xlab = "",
+     ylab = "Sampling mean",
+     main = "LLN convergence")
+abline(h = 1, col="red", lwd=3, lty=2)
+
+plot(1:1000, sampling_sd_iteration,
+     col="blue",
+     xlab = "",
+     ylab = "Sampling standard deviation",
+     main = "CLT convergence")
+abline(h = theoretical_sampling_sd, col="red", lwd=3, lty=2)
+
+qqnorm(sample_means)
+```
+
+
+For $n=10$ (\autoref{fig:lln_clt10}), the sampling distribution is less Normal (bottom left). However, the LLN and CLT still converge after approximately 400 random samples being drawn. The sampling mean is close to the population mean: $\mu \simeq \bar x = 0.99$, and the sampling standard deviation is given by $\frac{\sigma}{\sqrt{n}}\simeq s = 0.32$. 
+
+
+```{r lln_clt10, echo=FALSE, fig.width=7, fig.height=8, fig.align='center', fig.cap='LLN and CLT (population parameters: $\\alpha = 1, \\beta = 1, \\mu = 1$; random sample: n = 10, $\\bar x_1 = 1.52, \\bar x_2 = 0.70$; sampling distribution: $\\bar x = 0.98, s = 0.32$)'}
+
+N <- 10
+
+set.seed(1)
+random_sample1 <- sample(population_gamma,size = N,replace = FALSE)
+sample1_mean <- mean(random_sample1)
+
+set.seed(2)
+random_sample2 <- sample(population_gamma,size = N,replace = FALSE)
+sample2_mean <- mean(random_sample2)
+
+set.seed(3)
+sample_means <- sampling_mean_iteration <- sampling_sd_iteration <- rep(NA, 1000)
+for(i in 1:1000){
+  sample_means[i] = mean(sample(population_gamma,size = N,replace = FALSE))
+  sampling_mean_iteration[i] = mean(sample_means, na.rm = TRUE)
+  sampling_sd_iteration[i] = sd(sample_means, na.rm = TRUE)
+}
+
+sampling_mean <- mean(sample_means)
+sampling_sd <- sd(sample_means)
+theoretical_sampling_sd <- population_sd/sqrt(N)
+
+par(mfrow=c(2,2))
+# hist(population_gamma, # histogram
+#  col="lightgreen", # column color
+#  border="black",
+#  prob = TRUE, # show densities instead of frequencies
+#  xlab = "",
+#  main = "Population")
+# lines(density(population_gamma), # density plot
+#  lwd = 2, # thickness of line
+#  col = "red")
+# ?bquote
+# hist(random_sample1, # histogram
+#  col="lightblue", # column color
+#  border="black",
+#  prob = TRUE, # show densities instead of frequencies
+#  xlab = "",
+#  main = "Random sample 1")
+# lines(density(random_sample1), # density plot
+#  lwd = 2, # thickness of line
+#  col = "red")
+# 
+# hist(random_sample2, # histogram
+#  col="lightblue", # column color
+#  border="black",
+#  prob = TRUE, # show densities instead of frequencies
+#  xlab = "",
+#  main = "Random sample 2")
+# lines(density(random_sample1), # density plot
+#  lwd = 2, # thickness of line
+#  col = "red")
+
+hist(sample_means, # histogram
+ col="purple", # column color
+ border="black",
+ prob = TRUE, # show densities instead of frequencies
+ xlab = "",
+ main = "Sampling distribution")
+lines(density(sample_means), # density plot
+ lwd = 2, # thickness of line
+ col = "red")
+
+plot(1:1000, sampling_mean_iteration,
+     col="blue",
+     xlab = "",
+     ylab = "Sampling mean",
+     main = "LLN convergence")
+abline(h = 1, col="red", lwd=3, lty=2)
+
+plot(1:1000, sampling_sd_iteration,
+     col="blue",
+     xlab = "",
+     ylab = "Sampling standard deviation",
+     main = "CLT convergence")
+abline(h = theoretical_sampling_sd, col="red", lwd=3, lty=2)
+
+qqnorm(sample_means)
+```
+
+## Confidence intervals
+
+## Bootstrap
+
+shows the bootstrap idea: we avoid the task of taking many samples from the population by instead taking many resamples from a single sample. The values of x from these resamples form the bootstrap distribution. We use the bootstrap distribution rather than theory to learn about the sam- pling distribution.
+
+The one samples stands in for the population, and the resampling of random samples stand if for the random samples. The  boostrap distribution of sample means stand in for the sampling distribution.
+
+## Confidence intervals revisited
