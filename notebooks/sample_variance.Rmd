@@ -1,0 +1,92 @@
+---
+title: "The unbiased sample variance: why divide by n-1?"
+author: ""
+date: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+The **bias** of a **statistic** is given by
+
+\begin{eqnarray}
+bias(\hat\theta_n)&=&\mathbb{E}(\hat\theta_n) - \theta,
+\end{eqnarray}
+
+where $\hat\theta_n$ is only an estimate or statistic of the population parameter $\theta$. We say $\hat\theta_n$ is an **unbiased statistic** if $\mathbb{E}(\hat\theta_n)= \theta$ or $bias(\hat\theta_n)=0$. In other words, whenever the expected value of a statistic $\hat\theta_n$ is equal to the corresponding population parameter $\theta$, we call the statistic an unbiased statistic since $bias(\hat\theta_n)=0$. For instance, the sample mean 
+
+\begin{eqnarray}
+\bar{X_n}&=&\frac{1}{n}\displaystyle\sum^{n}_{i=1}X_i
+\end{eqnarray}
+
+is an unbiased statistic of the population parameter $\mu$. Its expected value is $\mu$:
+
+\begin{eqnarray}
+\mathbb{E}(\bar{X_n})&=&\mathbb{E}\left(\frac{1}{n}\displaystyle\sum^{n}_{i=1}X_i\right)\\
+&=&\frac{1}{n}\mathbb{E}\left(\displaystyle\sum^{n}_{i=1}X_i\right)\\
+&=&\frac{1}{n}\mathbb{E}\left(X_1 + X_2 + X_3 + \cdots + X_n\right)\\
+&=&\frac{1}{n}\left(\mathbb{E}\left(X_1\right)+\mathbb{E}\left(X_2\right)+\mathbb{E}\left(X_3\right)+\cdots+\mathbb{E}\left(X_n\right)\right)\\
+&=&\frac{1}{n}\left(\mu+\mu+\mu+\cdots+\mu\right)\\
+&=&\frac{1}{n}\left(n\mu\right)\\
+\end{eqnarray}
+
+$$\boxed{\mathbb{E}(\bar{X_n})=\mu.}$$
+As a result, $\bar{X_n}$ has no bias:
+
+\begin{eqnarray}
+bias(\bar X_n)&=&\mathbb{E}(\bar X_n) - \mu\\
+&=&\mu-\mu\\
+\end{eqnarray}
+
+$$\boxed{bias(\bar X_n)=0.}$$
+
+However, the expected value of the sample variance $s^2_\star=\frac{1}{n}\displaystyle\sum^{n}_{i=1}(X_i-\bar{X_n})^2$ isn't the population variance $\sigma^2$:
+
+\begin{eqnarray}
+\mathbb{E}(s^2_\star)&=&\mathbb{E}\left(\frac{1}{n}\displaystyle\sum^{n}_{i=1}(X_i-\bar{X_n})^2\right)\\
+&=&\frac{1}{n}\mathbb{E}\left(\displaystyle\sum^{n}_{i=1}(X_i-\bar{X_n})^2\right)\\
+&=&\frac{1}{n}\mathbb{E}\left(\displaystyle\sum^{n}_{i=1}(X^2_i - 2X_i\bar X_n + \bar X^2_n)\right)\\
+&=&\frac{1}{n}\mathbb{E}\left(\displaystyle\sum^{n}_{i=1}X^2_i - \displaystyle\sum^{n}_{i=1}\overbrace{2X_i\bar X_n}^{\displaystyle\sum^{n}_{i=1}X_i=n\bar X_n} + \displaystyle\sum^{n}_{i=1}\bar X^2_n)\right)\\
+&=&\frac{1}{n}\mathbb{E}\left(\displaystyle\sum^{n}_{i=1}X^2_i - \overbrace{2n\bar X_n\bar X_n}^{=2n\bar X^2_n} + n\bar X^2_n)\right)\\
+&=&\frac{1}{n}\mathbb{E}\left(\displaystyle\sum^{n}_{i=1}X^2_i - n\bar X^2_n\right)\\
+&=&\frac{1}{n}\left(\mathbb{E}\left(\displaystyle\sum^{n}_{i=1}X^2_i\right) - \mathbb{E}\left(n\bar X^2_n\right)\right)\\
+&=&\frac{1}{n}\left(\displaystyle\sum^{n}_{i=1}\mathbb{E}\left(X^2_i\right) -n \mathbb{E}\left(\bar X^2_n\right)\right)\\
+&=&\frac{1}{n}\left(\displaystyle\sum^{n}_{i=1}\left(\mathbb{V}(X_i)+(\mathbb{E}(X_i))^2\right) -n\left(\mathbb{V}(\bar X_n)+(\mathbb{E}(\bar X_n))^2\right)\right)\\
+&=&\frac{1}{n}\left(\displaystyle\sum^{n}_{i=1}\left(\sigma^2+\mu^2\right) -n\left(\frac{\sigma^2}{n}+\mu^2\right)\right)\\
+&=&\frac{1}{n}\left(n\sigma^2+n\mu^2-\sigma^2-n\mu^2\right)\\
+\end{eqnarray}
+
+$$\boxed{\mathbb{E}(s^2_\star)=\left(\frac{n-1}{n}\right)\sigma^2.}$$
+
+$s^2_\star$ underestimates $\sigma^2$ and is a **biased statistic**:
+
+\begin{eqnarray}
+bias(s^2_\star)&=&\mathbb{E}(s^2_\star) - \sigma^2\\
+&=&\left(\frac{n-1}{n}\right)\sigma^2-\sigma^2\\
+\end{eqnarray}
+
+$$\boxed{bias(s^2_\star)=-\frac{\sigma^2}{n}.}$$
+
+However if the sample variance is divided by $n-1$ rather $n$, then the expected value of $s^2=\frac{1}{n-1}\displaystyle\sum^{n}_{i=1}(X_i-\bar{X_n})^2$ is $\sigma^2$:
+
+
+\begin{eqnarray}
+\mathbb{E}(s^2)&=&\mathbb{E}\left(\frac{1}{n-1}\displaystyle\sum^{n}_{i=1}(X_i-\bar{X_n})^2\right)\\
+&=&\left(\frac{n-1}{n-1}\right)\sigma^2\\
+\end{eqnarray}
+
+$$\boxed{\mathbb{E}(s^2)=\sigma^2.}$$
+
+
+As a result, $s^2$ is now an unbiased statistic of the population variance:
+
+
+\begin{eqnarray}
+bias(s^2)&=&\mathbb{E}(s^2) - \sigma^2\\
+&=&\sigma^2-\sigma^2\\
+\end{eqnarray}
+
+$$\boxed{bias(s^2)=0.}$$

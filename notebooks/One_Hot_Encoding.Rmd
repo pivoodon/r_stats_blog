@@ -1,0 +1,132 @@
+---
+title: "One-Hot Encoding and Missingness"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+library(caret)
+library(GGally)
+library(naniar)
+library(VIM)
+library(car)
+
+
+```
+
+# Acquire and Read the data
+
+The dataset used for this analysis is an extraction from the 1994 census data by Barry Becker and donated to the public site http://archive.ics.uci.edu/ml/datasets/Census+Income. 
+
+This dataset is called the **Adult** dataset. It contains 15 columns and each row represents an individual.There is a total of 16,281 individuals. Some columns such as **Age** and **Occupation** are self-explanatory. **fnlwgt** is the final weight determined by Census Org, **Education-Num** is the number of years of education, **CapitalGain** and **CapitalLoss** are the capital gain and loss made by the individual respectively, **HoursperWeek** is the average number of hours spent by the individual on work.
+
+The **Adult** dataset is given by:
+
+```{r, echo=TRUE, warning=FALSE}
+
+testFileName = "adult.test"
+
+if (!file.exists(testFileName))
+    download.file(url = "http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.test", 
+                   destfile = testFileName)
+
+colNames = c("Age", "WorkClass", "fnlwgt", "Education", 
+              "EducationNum", "MaritalStatus", "Occupation",
+              "Relationship", "Race", "Sex", "CapitalGain",
+              "CapitalLoss", "HoursperWeek", "NativeCountry",
+              "IncomeLevel")
+
+adult_test_raw = read.table (testFileName, header = TRUE, sep = ",",
+                       strip.white = TRUE, col.names = colNames,
+                        stringsAsFactors = TRUE)
+
+adult_test = read.table (testFileName, header = TRUE, sep = ",",
+                       strip.white = TRUE, col.names = colNames,
+                        na.strings = "?", stringsAsFactors = TRUE)
+
+kable(head(adult_test_raw), booktabs = TRUE) %>%
+  kable_styling(font_size = 9)
+
+```
+
+Reading the dataset in its raw form, `adult_test_raw` has no missing data.  However factors such as **Occupation**, **NativeCountry** and **WorkClass** have "?" as a level. 
+
+```{r, echo=TRUE}
+
+str(adult_test_raw)
+
+```
+
+Replacing "?" with missing values, the missing pattern emerges as illustrated by the aggregate function in the `adult_test` dataset. The columns **Occupation** and **WorkClass** have 5.9% missing data; **NativeCountry** has 1.6% missing data. Notice the missingness pattern is not completely at random. This will be dicussed at a later post.
+
+```{r, echo=TRUE,  warning=FALSE}
+
+aggr_plot <- aggr(adult_test, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, labels=names(adult_test), cex.axis=.7, gap=3, ylab=c("Histogram of missing data","Pattern"))
+
+```
+
+# One-hot encoding
+
+The columns with factor values are separated from the `adult_test` dataset so that **One-hot encoding** can encode the factors and transform the data into a numeric matrix. `adult_test_chars` has 16,281 rows and 9 columns. One row for each individual in the original `adult_test` dataset. The 9 columns are the 9 factors present in the data:
+
+```{r, echo=TRUE}
+
+adult_test_chars <- adult_test %>%
+             select_if(is.factor)
+
+kable(head(adult_test_chars), booktabs = TRUE) %>%
+  kable_styling(font_size = 10)
+
+```
+
+For illustration purposes, only **Race** with 5 factors and **Sex** with 2 factors are transformed. After transforming the data, the **One-hot encoding** dataset has 7 columns with 1s and 0s as numeric values only. The 7 columns represent the combinations of factors for each row in the original `adult_test` dataset: 
+
+
+```{r, echo=TRUE}
+
+ohe <- dummyVars(" ~ .", data = adult_test_chars[,c("Race","Sex")])
+subset_ohe <- data.frame(predict(ohe, newdata = adult_test_chars[,c("Race","Sex")]))
+
+colnames(subset_ohe)
+```
+
+For instance, the individual in the first row of the `adult_test` dataset has $Race=black$ and $Sex=Male$. The first row in the **One-hot encoding** `subset_ohe` dataset has $Race.Black=1$ and $Sex.Male=1$, as expected.
+
+```{r, echo=TRUE}
+kable(head(subset_ohe), booktabs = TRUE) %>%
+  kable_styling(font_size = 10)
+
+```
+
+After transforming the entire data, the **One-hot encoding** dataset has 100 columns with 1s and 0s as numeric values only, and 16,281 rows. The 100 columns represent the combinations of all levels of the 9 factors. Each row is each individual in the original `adult_test` dataset:
+
+
+```{r, echo=TRUE}
+
+adult_test %>% 
+  select_if(is.factor) %>% 
+  sapply(levels)
+
+```
+
+Some of the factor columns in the numeric matrix `test_ohe` are illustrate below:
+
+```{r, echo=TRUE}
+ohe <- dummyVars(" ~ .", data = adult_test_chars)
+test_ohe <- data.frame(predict(ohe, newdata = adult_test_chars))
+
+dim(test_ohe)
+car::some(colnames(test_ohe), 20)
+```
+
+Once again, the individual in the first row of the `adult_test` dataset has $WorkClass=Private$. The first row in the **One-hot encoding** `test_ohe` dataset has $WorkClass.Private=1$ and so on and so forth for the remaining columns. Notice the fifth individuals has missing values in the `adult_test` dataset. For this reason, the fifth row in `test_ohe` has all missing values.
+
+```{r, echo=TRUE}
+
+kable(head(test_ohe[,1:8]), booktabs = TRUE) %>%
+  kable_styling(font_size = 9)
+
+```

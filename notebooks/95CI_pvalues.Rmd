@@ -1,0 +1,80 @@
+---
+title: "95% confidence intervals (CI) and p-values"
+author: ""
+date: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+It is common to determine the statistical significance of the difference between two means by examining whether the two 95% confidence intervals (CI) overlap. Inverting the idea behind the CI, we can restate the problem under a hypothesis testing context. A
+ **two-sample z-test or t-test** examines the **null hypothesis** $H_0$ that two observed sample means have been drawn from the same population. Even if they are drawn from the same population, they will be different. An appropriate **test statistic** compares the difference between the two sample means. The $H_0$ that the true difference is zero is tested agains the **alternalte hypothesis** $H_A$ that the difference is different than zero. 
+ 
+ If the sample is drawn from the population, $\bar{X_n}$ is expected to be equal to $\mu$ under $H_0$. If the sample is not drawn from the population, $\bar{X_n}$ is expected to be different than $\mu_0$ under the **alternalte hypothesis** $H_A$. The problem in **hypothesis testing** is to find an appropriate **test statistic** $T_{stat}$ and an appropriate **critical value** $c$. If $T_{stat} > c$, $H_0$ is rejected; if $T_{stat}\leq c$, $H_0$ isn't rejected. 
+
+
+# z-test for a population mean (variance known)
+
+Let $\bar X_1$ and $\bar X_2$ denote the sample means in the first and second groups, respectively. Both groups have a sample of size $n$. For simplicity, let's assume that **the population variance is known and equal to $\sigma^2$**, and that the first mean is less than the second mean: $\bar X_1 < \bar X_2$. 
+
+Hence the test statistic is given by 
+
+\begin{eqnarray}
+Z_{stat}&=&\frac{\bar{X}-\mu_0}{\sigma/\sqrt{n}}. 
+\end{eqnarray}
+
+Notice the population variance is used to calculate the test statistic. 
+
+The appropriate critical value $c$ is defined by the tails of the Z-distribution (Fig 1). For a **significance level** $\alpha$, $H_0: \mu=\mu_0$ is rejected if $Z_{stat}>z_{1-\alpha/2}$ or $Z_{stat}<z_{\alpha/2}$, where $z_{1-\alpha/2}$ and $z_{\alpha/2}$ are the upper and lower quantiles of order $1-\alpha/2$ and $\alpha/2$ of the Z-distribution. This is equivalent to saying $H_0: \mu=\mu_0$ is rejected if $|Z_{stat}|>z_{1-\alpha/2}$. If indeed $|Z_{stat}|>z_{1-\alpha/2}$, then the $H_A: \mu\neq\mu_0$ is favored.
+
+The lower the $\alpha$ level, the harder it is to reject $H_0$ as $z_{1-\alpha}$ is further on the right tail and $z_{\alpha/2}$ is further on the left tail of the Z-distribution (Fig 1). Equivalently, the greater the magnitude of $Z_{stat}$, that is, $Z_{stat}>>z_{1-\alpha/2}$ or $Z_{stat}<<z_{\alpha/2}$, the greater the evidence against the $H_0$ that there is no significant difference. 
+
+The probability of getting a value $Z_{stat}$ is called the **p-value**. The test is significant at the $\alpha$ level if and only if $p_{value}\leq\alpha$. $Z_{stat}$ and $p_{value}$ are inexorably linked. The greater the magnitude of $Z_{stat}$, the lower the probability of a such large number being computed by chance, i.e, the lower the $p_{value}$.
+
+
+A $(1-\alpha)\times 100%$-CI for the first group is given by $\left(\bar X_1 - z_{\alpha/2}\frac{\sigma}{\sqrt{n}}, \bar X_1 + z_{1-\alpha/2}\frac{\sigma}{\sqrt{n}}\right)$, where $z_{1-\alpha/2}$ and $z_{\alpha/2}$ are the upper and lower quantiles of order $1-\alpha/2$ and $\alpha/2$ of the **Z-distribution**. This is equivalent to saying that $(1-\alpha)\times 100%$-CI for the first group is given by $\left(\bar X_1 \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}}\right)$.
+
+Similary, the $(1-\alpha)\times 100%$-CI for the second group is given by $\left(\bar X_2 \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}}\right)$.
+
+For a 90%-CI, $\alpha = 0.10$ and the lower $5th$-quantile and the upper $95th$-quantile are given by  $z_{0.10/2}=z_{0.05}=-1.645$ and $95th (z_{1-0.10/2}=z_{0.95}=+1.645$ respectively. Hence, the first and second groups 90%-CI are $\left(\bar X_1 \pm 1.645\frac{\sigma}{\sqrt{n}}\right)$ and $\left(\bar X_2 \pm 1.645\frac{\sigma}{\sqrt{n}}\right)$.
+
+Similarly, for a 95%-CI, $\alpha = 0.05$ and the lower $2.5th$-quantile and the upper $97.5th$-quantile are given by  $z_{0.05/2}=z_{0.025}=-1.96$ and $97.5th (z_{1-0.05/2}=z_{0.975}=+1.96$ respectively. The first and second groups 95%-CI are $\left(\bar X_1 \pm 1.96\frac{\sigma}{\sqrt{n}}\right)$ and $\left(\bar X_2 \pm 1.96\frac{\sigma}{\sqrt{n}}\right)$.
+
+Finally, for a 99%-CI, $\alpha = 0.01$ and the lower $0.5th$-quantile and the upper $99.5th$-quantile are given by  $z_{0.01/2}=z_{0.005}=-2.575$ and $99.5th (z_{1-0.01/2}=z_{0.995}=+2.575$ respectively. The first and second groups 99%-CI are $\left(\bar X_1 \pm 2.575\frac{\sigma}{\sqrt{n}}\right)$ and $\left(\bar X_2 \pm 2.575\frac{\sigma}{\sqrt{n}}\right)$. 
+
+The 90%-CI, 95%-CI and 99%-CI are well-known confidence intervals because it is standard practice to set $\alpha = 0.10$, $\alpha = 0.05$ or $\alpha = 0.01$ for hypothesis testing. However, one can't conclude that having overlapping 95%-CI is equivalent to accepting the $H_0$ with a **p-value** that is greater than 0.05. Conversely, one can't conclude that having non-overlapping 95%-CI is equivalent to rejecting the $H_0$ in favour of the $H_A$ with a **p-value** that is less than 0.05.
+
+
+Suppose the 95%-CI overlap, with the proportion of the overlap being $p$. First, notice that the width of any 95%-CI is given by 
+
+\begin{eqnarray}
+\bar X_1 + 1.96\frac{\sigma}{\sqrt{n}} - \left(\bar X_1 - 1.96\frac{\sigma}{\sqrt{n}}\right)&=& 2\times 1.96\frac{\sigma}{\sqrt{n}}.
+\end{eqnarray}
+
+$$\boxed{\mathbb{E}(\bar{X_n})=\mu.}$$
+
+Hence, the difference between the $97.5th$-quantile of the first group and the $2.5th$-quantile of the second group is
+
+\begin{eqnarray}
+\bar X_1 + 1.96\frac{\sigma}{\sqrt{n}}  - \left(\bar X_2 - 1.96\frac{\sigma}{\sqrt{n}}\right)&=&p \times 2 \times 1.96\frac{\sigma}{\sqrt{n}}\\
+\bar X_2 - \bar X_1&=& 2 \times 1.96\frac{\sigma}{\sqrt{n}}-p \times 2 \times 1.96\frac{\sigma}{\sqrt{n}} \\
+&=&\frac{\alpha}{2} + \frac{\alpha}{2} \\
+&=&\alpha.
+\end{eqnarray}
+
+
+
+ 95% confidence intervals can overlap even significantly different from one another at the $\alpha = 0.05$ level.
+
+In general, two sample means calculated from different batches of data, even if they are drawn from the same population or generating process, will be different. The usual test statistic in this situa- tion is a function of the difference of the two sample means being compared, and the actual observed difference will almost always be some number other than zero. The null hypothesis is usually that the true difference is zero. The alternative hypothesis is either that the true difference is not zero (the case where no a priori information is available as to which underlying mean should be larger, leading to a two-tailed test), or that one of the two under
+
+
+
+
+Let $\bar X_1$ and $\bar X_2$ denote the sample means in the first and second groups, respectively. To simplify the algebra, we assume a common known population variance, $\sigma^2$, in each of the two groups. We shall use formulas from Rosner.3 For simplicity, we assume that the first mean is less than the second mean. Suppose the confidence intervals overlap, with the proportion of the overlap being p. For example, we use mean hemoglobin
+
+arger than 1.96. This will hold as long as p is less than .29. Hence, as long as the two 95% confidence intervals overlap by less than 29%, one will reject the null hypothesis of the equality of the two means with a P value of less than .05. The 
+The previous argument can be easily modified to the case in which unknown population variances are estimated with the sample variances. In such a situation, depending on the sample size, the degree of overlap can exceed 29%, and the two means would still be significantly different from one another at the .05 level. The Table contains several degrees of overlap and the P values with which one would reject the null hypothesis that the means of the two groups are equal, if the two 95% confi- dence intervals overlap. Therefore, the fact that two confi- dence intervals overlap does not necessarily imply that the two means are not significantly different from one another.
+We have shown that two 95% confidence intervals can overlap and yet the two means can be statistically signifi- cantly different from one another at the 􏰀 􏰂 0.05 level. Hence, one cannot use the fact that two 95% confidence intervals overlap as a substitute for hypothesis testing
